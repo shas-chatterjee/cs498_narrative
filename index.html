@@ -23,18 +23,6 @@
 		<div class="footnote"> source: S&P 500, Goldman Sachs Commodities Index, US NAREIT</div>
 	</div>
 
-	<!-- CHART 2 - LINE CHART OF CRYPTOCURRENCY APPRECIATION -->
-	<div class="slides fade">
-		<h1> The Bitcoin Rally: Outpacing Traditional Assets </h1>
-		2017 was a phenomenal year for Bitcoin. 
-		Had you invested $1 in Bitcoin at the beginning of the year, you would have accumulated $14.68 by the end of the year.
-		Despite various hacks and crashes, Bitcoin has completely outpaced traditional assets. <br>
-		<font size="2" color="dodgerblue">[click on legend to add / remove assets from chart]</font>
-		<div class="page_number">2 / 5</div>
-		<div class="chart-wrapper" id="chart-line2"></div>
-		<div class="footnote"> source: www.coinmarketcap.com </div>
-	</div>
-
 
 	<!-- CHART 3 - LINE CHART OF CRYPTOCURRENCY APPRECIATION -->
 	<div class="slides fade">
@@ -62,17 +50,6 @@
 	</div>
 
 
-	<!-- CHART 5 - Risk Liquidity -->
-	<div class="slides fade">
-		 <h1> Which Coins? The Risk - Liquidity Relationship </h1>
-		We see a negative trend between risk and liquidity (traded volume) in the cryptocurrency universe throughout 2017. We find larger capitalization coins are traded more frequently and have lower risk.
-		Higher risk cryptocurrencies are generally less liquid. <br>
-		<font size="2" color="dodgerblue">[hover above dots to see details  /  radius of dots is scaled to log market-cap]</font>
-		<div class="page_number">5 / 5</div>
-		<div class="chart-wrapper" id="chart-line5"> </div>
-		<div class="footnote"> source: www.coinmarketcap.com </div>  
-	</div>
-
 	<!-- NEXT AND PREVIOUS ARROWS -->
 	<a class="prev" onclick="plusSlides(-1)">&#10094;</a>
 	<a class="next" onclick="plusSlides(1)">&#10095;</a>
@@ -84,8 +61,6 @@
 	<span class="dot" onclick="currentSlide(1)"></span>
 	<span class="dot" onclick="currentSlide(2)"></span>
 	<span class="dot" onclick="currentSlide(3)"></span>
-	<span class="dot" onclick="currentSlide(4)"></span>
-	<span class="dot" onclick="currentSlide(5)"></span>
 </div>
 
 <br>
@@ -110,14 +85,14 @@
 	// Toggle slide display and dots
 	function showSlides(n) {
 	  var i;
-	  var slides = document.getElementsByClassName("slides");
-	  var dots = document.getElementsByClassName("dot");
+	  var slides = 3;
+	  var dots = 3;
 	  if (n > slides.length) {slideIndex = 1}
 	  if (n < 1) {slideIndex = slides.length}
 	  for (i = 0; i < slides.length; i++) {
 	      slides[i].style.display = "none";
 	  }
-	  for (i = 0; i < dots.length; i++) {
+	  for (i = 0; i < 3; i++) {
 	      dots[i].className = dots[i].className.replace(" dot_active", "");
 	  }
 	  slides[slideIndex-1].style.display = "block";
@@ -134,7 +109,6 @@
 							'Commodities': {column: 'commodities', visible: true},
 							'Gold': {column: 'gold', visible: true},
 							'Real_Estate': {column: 'REIT', visible: true}}
-
 
 
 	//Chart 3 - Compare a Range of Cryptocurrencies
@@ -184,7 +158,6 @@
 		    chart1.bind({selector:"#chart-line1", axisLabels: chart1_axisLabel});
 		    chart1.render(); 
 
-
 		    var chart3 = makeLineChart(data, 'date', chart3_variables);
 		    chart3.bind({selector:"#chart-line3", axisLabels: chart3_axisLabel});
 		    chart3.render();
@@ -194,7 +167,7 @@
 	// Chart 4 & 5: Scatterplots
 	var chart4_annotations = [{ x: 0.14, y: 0.025, y0: 0.016, text: 'Positive correlation between returns and risk for major coins', orient: 'left' }, 
 	{ x: 0.24, y: -0.005, y0: 0.005, text: 'Risk not rewarded for smaller coins  .', orient: 'left' }];
-	
+
 
 	    d3.csv('crypto_descriptive_2017.csv')
 	    	.row(function(d){
@@ -212,6 +185,11 @@
 				var chart4 = makeScatterplot(data, {xAxis: 'Daily Risk (Standard Deviation)', yAxis: 'Average Daily Return in 2017'}, chart4_annotations);
 				chart4.bind("#chart-line4");
 				chart4.render();
+
+				// log transform chart
+				var chart5 = makeScatterplot2(data, {xAxis: 'Daily Risk (Standard Deviation)', yAxis: 'Log (Average Daily Traded Value) (in USD)'}, chart5_annotations);
+				chart5.bind("#chart-line5");
+				chart5.render();
 			});
 
 
