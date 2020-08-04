@@ -1,368 +1,261 @@
-/*
-    Line Chart using D3
-
-*/
-
-function makeLineChart(dataset, xName, yNames, annotations) {
-
-     // Initialize Chart
-    var chart = {};
-    chart.data = dataset;
-    chart.xName = xName;
-    chart.yNames = yNames;
-    chart.groupObjs = {};
-    chart.objs = {mainDiv: null, chartDiv: null, g: null, xAxis: null, yAxis: null, tooltip:null, legend:null};
-
-    // Colors
-    var colorFunct = d3.scaleOrdinal(d3.schemeCategory20);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CS 498 NARRATIVE VISUALIZATION</title>
+    <link rel="stylesheet" type="text/css" href="chartFormat.css">  <!-- CSS stylesheet for assignment -->
+    <script src="https://d3js.org/d3.v4.min.js"></script>				<!-- D3 library for assignment -->
+    <script src="interactiveLineChart.js" charset="utf-8"></script>				<!-- JS D3 code for line chart -->
+    <script src="scatterPlot.js" charset="utf-8"></script>				<!-- JS D3 code for scatterplot -->
+</head>
+<!-- slide show container -->
+<div class="slideshow_box">
 
 
-    //Formatter functions for the axes
-    chart.formatAsNumber = d3.format(".0f");
-    chart.formatAsCurrenchartY = d3.format("$.2f");
-    chart.formatAsFloat = function(d) {if(d%1!==0){return d3.format(".2f")(d);}else{return d3.format(".0f")(d);}};
-    chart.formatAsDay = d3.timeFormat("%a %d %B %Y");
+	<!-- CHART 1 - LINE CHART OF CRYPTOCURRENCY APPRECIATION -->
+	<div class="slides fade">
+		<h1> Traditional Assets in 2017 </h1>
+		Aside from Equities, traditional asset classes have had a poor run in 2017. Real Estate  remained largely flat, and Commodities and Gold have struggled due to unfavourable macro / polictical conditions.
+		Bitcoin however ... <br>
+		<font size="2" color="dodgerblue">[click on legend to add / remove assets from chart]</font>
+		<div class="page_number">1 / 5</div>
+		<div class="chart-wrapper" id="chart-line1"></div>
+		<div class="footnote"> source: S&P 500, Goldman Sachs Commodities Index, US NAREIT</div>
+	</div>
+
+	<!-- CHART 2 - LINE CHART OF CRYPTOCURRENCY APPRECIATION -->
+	<div class="slides fade">
+		<h1> The Bitcoin Rally: Outpacing Traditional Assets </h1>
+		2017 was a phenomenal year for Bitcoin. 
+		Had you invested $1 in Bitcoin at the beginning of the year, you would have accumulated $14.68 by the end of the year.
+		Despite various hacks and crashes, Bitcoin has completely outpaced traditional assets. <br>
+		<font size="2" color="dodgerblue">[click on legend to add / remove assets from chart]</font>
+		<div class="page_number">2 / 5</div>
+		<div class="chart-wrapper" id="chart-line2"></div>
+		<div class="footnote"> source: www.coinmarketcap.com </div>
+	</div>
 
 
-    function getYFuncts() {
-        // Return a list of all *visible* y functions
-        var yFuncts = [];
-        for (var yName in chart.groupObjs) {
-            currentGroup = chart.groupObjs[yName];
-            if (currentGroup.visible == true) {
-                yFuncts.push(currentGroup.yFunct);
-            }
-        }
-        return yFuncts
-    }
-
-    function getYMax () {
-        // Get the max y value of all *visible* y lines
-        return d3.max(getYFuncts().map(function(fn){
-            return d3.max(chart.data, fn);
-        }))
-    }
-
-    function prepareData() {
-        chart.xFunct = function(d){return d[xName]};
-        chart.bisectYear = d3.bisector(chart.xFunct).left;
-
-        for (var yName in chart.yNames) {
-            chart.groupObjs[yName] = {yFunct:null, visible:null, objs:{}};
-        }
-
-        // For each yName argument, create a yFunction
-        function getYFn(column) {
-            return function (d) {
-                return d[column];
-            };
-        }
-
-        // Object instead of array
-        chart.yFuncts = [];
-        for (yName in chart.yNames) {
-            var chartY = chart.groupObjs[yName];
-            chartY.visible = !chart.yNames[yName].visible ; // -- this needs to be the opposite of what it should be, because we will toggleSeries
-            chartY.yFunct = getYFn(chart.yNames[yName].column);
-        }
-    }
-
-    prepareData();
-
-    chart.update = function () {
-        chart.width = parseInt(chart.objs.chartDiv.style("width"), 10) - (chart.margin.left + chart.margin.right);
-        chart.height = parseInt(chart.objs.chartDiv.style("height"), 10) - (chart.margin.top + chart.margin.bottom);
-
-        chart.xScale.range([0, chart.width]);
-        chart.yScale.range([chart.height, 0.7]).domain([0.7, getYMax()]);
-
-       if (!chart.objs.g) {return false;}
-
-        /* Else Update the axis with the new scale */
-        chart.objs.axes.g.select('.x.axis').attr("transform", "translate(0," + chart.height + ")").call(chart.objs.xAxis);
-        chart.objs.axes.g.select('.x.axis .label').attr("x", chart.width / 2);
-
-        chart.objs.axes.g.select('.y.axis').call(chart.objs.yAxis);
-        chart.objs.axes.g.select('.y.axis .label').attr("x", -chart.height / 2);
-
-        // update chart lines to show only visible ones
-        for (var yName  in chart.groupObjs) {
-            chartY = chart.groupObjs[yName];
-            if (chartY.visible==true) {
-                chartY.objs.line.g.attr("d", chartY.objs.line.series).style("display",null);
-                chartY.objs.tooltip.style("display",null);
-                // update annotations
-                d3.selectAll("#tag"+yName).transition().duration(200).style("display", null);
-
-            } else {
-                chartY.objs.line.g.style("display","none");
-                chartY.objs.tooltip.style("display","none");
-                // update annotations
-                d3.selectAll("#tag"+yName).transition().duration(200).style("display", "none");
-            }
-        }
-
-        chart.objs.tooltip.select('.line')
-            .attr("y2", chart.height);
-
-        chart.objs.chartDiv.select('svg')
-            .attr("width", chart.width + (chart.margin.left + chart.margin.right))
-            .attr("height", chart.height + (chart.margin.top + chart.margin.bottom));
-
-        chart.objs.g.select(".overlay")
-            .attr("width", chart.width)
-            .attr("height", chart.height);
-
-        return chart;
-    };
+	<!-- CHART 3 - LINE CHART OF CRYPTOCURRENCY APPRECIATION -->
+	<div class="slides fade">
+		 <h1> More than just Bitcoin </h1>
+		Bitcoin has not been alone. The year 2017 saw significant price appreciation in all cryptocurrencies. 
+		Many of the newer coins have rallied significantly by the end of the year due to increased news coverage and positive sentiment. 
+		As an investor (or a speculative trader), which coins should you consider buying? ... <br>
+		<font size="2" color="dodgerblue">[click on legend to add / remove coins from chart]</font>
+		<div class="page_number">3 / 5</div>
+		<div class="chart-wrapper" id="chart-line3"></div>
+		<div class="footnote"> source: www.coinmarketcap.com </div>
+	</div>
 
 
-    chart.bind = function (chartOptions) {
-
-        // chart bind options
-        function getChartOptions() {
-            // selector
-            chart.objs.mainDiv = d3.select(chartOptions.selector);
-            chart.selector = chartOptions.selector + " .inner-box"; 
-
-             // set Axis Labels 
-            chart.xAxisLabel = chartOptions.axisLabels.xAxis;
-            chart.yAxisLabel = chartOptions.axisLabels.yAxis;
-        }
-        getChartOptions();
-
-        // assign chart dimensions 
-        chart.margin = {top: 15, right: 40, bottom: 30, left: 90};
-        chart.divWidth = 900;
-        chart.divHeight = 480;
-        chart.width = chart.divWidth - chart.margin.left - chart.margin.right;
-        chart.height = chart.divHeight - chart.margin.top - chart.margin.bottom;
-
-        // create scale with updated dimensions
-        chart.xScale = d3.scaleTime()
-            .range([0, chart.width])
-            .domain(d3.extent(chart.data, chart.xFunct));
-        chart.yScale = d3.scaleLinear()
-            .range([chart.height, 0.7])
-            .domain([0.7, getYMax()]);
-
-        // create axes     
-        chart.objs.xAxis = d3.axisBottom().scale(chart.xScale);
-        chart.objs.yAxis = d3.axisLeft().scale(chart.yScale).tickFormat(chart.formatAsFloat); 
-
-        // create lines
-        function yScaleFunc(yName) {
-            return function (d) {
-                return chart.yScale(chart.groupObjs[yName].yFunct(d));
-            };
-        } 
-        for (var yName in yNames) {
-            var chartY = chart.groupObjs[yName];
-            chartY.objs.line = {g:null, series:null};
-            chartY.objs.line.series = d3.line()
-                .x(function (d) {return chart.xScale(chart.xFunct(d));})
-                .y(yScaleFunc(yName))
-                .curve(d3.curveBasis);
-        };
-
-        chart.objs.mainDiv.style("max-width", chart.divWidth + "px");
-        chart.objs.mainDiv.append("div")
-            .attr("class", "inner-wrapper")
-            .style("padding-bottom", (chart.divHeight / chart.divWidth) * 100 + "%")
-            .append("div").attr("class", "outer-box")
-            .append("div").attr("class", "inner-box");
-        chart.objs.chartDiv = d3.select(chart.selector);
-        d3.select(window).on('resize.' + chart.selector, chart.update);
-
-        // create svg
-        chart.objs.g = chart.objs.chartDiv.append("svg")
-            .attr("class", "chart-area")
-            .attr("width", chart.width + (chart.margin.left + chart.margin.right))
-            .attr("height", chart.height + (chart.margin.top + chart.margin.bottom))
-            .append("g")
-            .attr("transform", "translate(" + chart.margin.left + "," + chart.margin.top + ")");
-
-        chart.objs.axes = {};
-        chart.objs.axes.g = chart.objs.g.append("g").attr("class", "axis");
-
-        // generate y and x axes
-        chart.objs.axes.x = chart.objs.axes.g.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + chart.height + ")")
-            .call(chart.objs.xAxis)
-            .append("text")
-                .attr("x", chart.width)
-                .attr("y", 30)
-                .attr("fill", "#000")
-                .style("text-anchor", "middle")
-                .text(chart.xAxisLabel);
-
-        chart.objs.axes.y = chart.objs.axes.g.append("g")
-            .attr("class", "y axis")
-            .call(chart.objs.yAxis)
-            .append("text")
-                .attr("transform", "rotate(-90)")
-                .attr("y", -42)
-                .attr("x", -chart.height / 2)
-                .attr("dy", ".1em")
-                .attr("fill", "#000")
-                .style("text-anchor", "middle")
-                .text(chart.yAxisLabel);
-        return chart;
-
-    };
-
-    chart.render = function () {
-
-        chart.objs.legend = chart.objs.mainDiv.append('div').attr("class", "legend");
-
-        function toggleSeries(yName) {
-            var chartY = chart.groupObjs[yName];
-            chartY.visible = !chartY.visible;
-            if (chartY.visible==false) {chartY.objs.legend.div.style("opacity","0.25")} else {chartY.objs.legend.div.style("opacity","1")}
-            chart.update()
-        }
-        function getToggleFn(series) {
-            return function () {
-                return toggleSeries(series);
-            };
-        }
-
-        for (var yName in chart.groupObjs) {
-            chartY = chart.groupObjs[yName];
-            chartY.objs.g = chart.objs.g.append("g");
-            chartY.objs.line.g = chartY.objs.g.append("path")
-                .datum(chart.data)
-                .attr("class", "line")
-                .attr("d", chartY.objs.line.series)
-                .style("stroke", colorFunct(yName))
-                .attr("data-series", yName)
-                .on("mouseover", function () {
-                    tooltip.style("display", null);
-                }).on("mouseout", function () {
-                    tooltip.transition().delay(700).style("display", "none");
-                }).on("mousemove", mouseHover);
-
-            chartY.objs.legend = {};
-            chartY.objs.legend.div = chart.objs.legend.append('div').on("click",getToggleFn(yName));
-            chartY.objs.legend.icon = chartY.objs.legend.div.append('div')
-                .attr("class", "series-marker")
-                .attr("id", "icon"+ yName)
-                .style("background-color", colorFunct(yName));
-            chartY.objs.legend.text = chartY.objs.legend.div.append('p').text(yName);
-
-        }
+	<!-- CHART 4 - Risk Return  -->
+	<div class="slides fade">
+	<h1> Which Coins? The Risk - Return Relationship </h1>
+		We examine a universe of 250+ crytocurrencies.
+		We see a positive trend between risk and returns in the cryptocurrency universe throughout 2017.  This is especially true with the larger market capitalization coins, where higher risk is rewarded with higher returns.
+		For smaller capitalization coins, we find that risk is not neccessarily rewarded. <br>
+		<font size="2" color="dodgerblue">[hover above dots to see details  /  radius of dots is scaled to log market-cap]</font>
+		<div class="page_number">4 / 5</div>
+		<div class="chart-wrapper" id="chart-line4"></div>
+		<div class="footnote"> source: www.coinmarketcap.com</div>  
+	</div>
 
 
-        // tooltips
-        chart.objs.tooltip = chart.objs.g.append("g")
-            .attr("class", "tooltip")
-            .style("display", "none");
-        // Year label
-        chart.objs.tooltip.append("text")
-            .attr("class", "year")
-            .attr("x", 9)
-            .attr("y", 7);
-        // Focus line
-        chart.objs.tooltip.append("line")
-            .attr("class", "line")
-            .attr("y1", 0)
-            .attr("y2", chart.height)
-            .style("stroke-dasharray", "3,3");
+	<!-- CHART 5 - Risk Liquidity -->
+	<div class="slides fade">
+		 <h1> Which Coins? The Risk - Liquidity Relationship </h1>
+		We see a negative trend between risk and liquidity (traded volume) in the cryptocurrency universe throughout 2017. We find larger capitalization coins are traded more frequently and have lower risk.
+		Higher risk cryptocurrencies are generally less liquid. <br>
+		<font size="2" color="dodgerblue">[hover above dots to see details  /  radius of dots is scaled to log market-cap]</font>
+		<div class="page_number">5 / 5</div>
+		<div class="chart-wrapper" id="chart-line5"> </div>
+		<div class="footnote"> source: www.coinmarketcap.com </div>  
+	</div>
 
-        for (yName in chart.groupObjs) {
-            chartY = chart.groupObjs[yName];
-            var tooltip = chart.objs.tooltip.append("g");
-            chartY.objs.circle = tooltip.append("circle")
-                .attr("r", 4)
-                .style("stroke", colorFunct(yName))
-                .style("fill", "white");
-            chartY.objs.rect = tooltip.append("rect")
-                .attr("x", "9")
-                .attr("y","-5")
-                .attr("width",22)
-                .attr("height",'0.5em')
-                .style("opacity", 0.8)
-                .attr("fill", "white");
-            chartY.objs.text = tooltip.append("text")
-                .attr("x", "9")
-                .attr("dy", ".35em")
-                .style("font-size", "8px")
-                .style("fill", colorFunct(yName))
-                .attr("class","value");
-            chartY.objs.tooltip = tooltip;
-        }
+	<!-- NEXT AND PREVIOUS ARROWS -->
+	<a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+	<a class="next" onclick="plusSlides(1)">&#10095;</a>
 
-        // Overlay to capture hover
-        chart.objs.g.append("rect")
-            .attr("class", "overlay")
-            .attr("width", chart.width)
-            .attr("height", chart.height)
-            .on("mouseover", function () {
-                chart.objs.tooltip.style("display", null);
-            }).on("mouseout", function () {
-                chart.objs.tooltip.style("display", "none");
-            }).on("mousemove", mouseHover);
+</div>
+<br>
 
-        // this could be improved.        
-        for (var yName in chart.groupObjs) {
-            toggleSeries(yName);
-        }
-        
+<div style="text-align:center">
+	<span class="dot" onclick="currentSlide(1)"></span>
+	<span class="dot" onclick="currentSlide(2)"></span>
+	<span class="dot" onclick="currentSlide(3)"></span>
+	<span class="dot" onclick="currentSlide(4)"></span>
+	<span class="dot" onclick="currentSlide(5)"></span>
+</div>
 
-        // Add Annotations 
-        if (annotations) {
-            chart.objs.g.selectAll("text.label")
-                .data(annotations)
-                .enter()
-                .append("text")
-                .attr('x', function(d) { return chart.xScale(d.x)})
-                .attr('y', function(d) { return chart.yScale(d.y)})
-                .attr('id', function(d) {return 'tag'+ d.asset})
-                .attr("fill", "grey")
-                .style("display", function(d) { if (chart.groupObjs[d.asset].visible == true) { return null; } else { return "none"; }; })
-                .style('text-anchor', function(d) { return d.orient == 'right' ? 'start' : 'end'})
-                .text(function(d) { return d.text});
-            chart.objs.g.selectAll("text.label")
-                .data(annotations)
-                .enter()
-                .append("line")
-                .attr("x1", function(d) {  return chart.xScale(d.x)})
-                .attr("x2", function(d) {  return chart.xScale(d.x)})
-                .attr("y1", function(d) {  return chart.yScale(d.y0)}) 
-                .attr("y2", function(d) {  return chart.yScale(d.y)})
-                .attr('id', function(d) {return 'tag'+ d.asset})
-                .style("stroke", "grey")
-                .style("display", function(d) { if (chart.groupObjs[d.asset].visible == true) { return null;} else { return "none";}; })
-                .style("opacity", 0.7)
-                .style("stroke-dasharray", "3,1");
-        };
-
-        return chart;
+<br>
 
 
-        function mouseHover() {
-            var x0 = chart.xScale.invert(d3.mouse(this)[0]), i = chart.bisectYear(dataset, x0, 1), d0 = chart.data[i - 1], d1 = chart.data[i];
-            try {
-                var d = x0 - chart.xFunct(d0) > chart.xFunct(d1) - x0 ? d1 : d0;
-            } catch (e) { 
-                return;
-            }
-            var minY = chart.height;
-            for (var yName in chart.groupObjs) {
-                var chartY = chart.groupObjs[yName];
-                if (chartY.visible==false) {
-                    continue;
-                }
-                chartY.objs.tooltip.attr("transform", "translate(" + chart.xScale(chart.xFunct(d)) + "," + chart.yScale(chartY.yFunct(d)) + ")");
-                chartY.objs.tooltip.select("text").text( "$" + chart.formatAsFloat(chartY.yFunct(d))  );
-                minY = Math.min(minY, chart.yScale(chartY.yFunct(d)));
-            }
 
-            chart.objs.tooltip.select(".tooltip .line").attr("transform", "translate(" + chart.xScale(chart.xFunct(d)) + ")").attr("y1", minY);
-            chart.objs.tooltip.select(".tooltip .year").text("Date: " + chart.formatAsDay(chart.xFunct(d)));
-        }
+<script type="text/javascript">
 
-    };
-    return chart;
-}
+	var slideIndex = 1;
+	showSlides(slideIndex);
+
+	// Next/previous controls
+	function plusSlides(n) {
+	  showSlides(slideIndex += n);
+	}
+
+	// Dot controls
+	function currentSlide(n) {
+	  showSlides(slideIndex = n);
+	}
+
+	// Toggle slide display and dots
+	function showSlides(n) {
+	  var i;
+	  var slides = document.getElementsByClassName("slides");
+	  var dots = document.getElementsByClassName("dot");
+	  if (n > slides.length) {slideIndex = 1}
+	  if (n < 1) {slideIndex = slides.length}
+	  for (i = 0; i < slides.length; i++) {
+	      slides[i].style.display = "none";
+	  }
+	  for (i = 0; i < dots.length; i++) {
+	      dots[i].className = dots[i].className.replace(" dot_active", "");
+	  }
+	  slides[slideIndex-1].style.display = "block";
+	  dots[slideIndex-1].className += " dot_active";
+	} 
+
+	// parse date 
+	var parseTime = d3.timeParse("%d/%m/%Y");
+
+	// Chart 1 - Traditional Assets
+	var chart1_annotations = [{ x: new Date('09/03/2017'), y: 0.77, y0: 1.04, asset: 'Real_Estate',  text: '- Traditional assets have had a lacklustre year', orient: 'right' }];						
+	var chart1_axisLabel =  {xAxis: 'Date', yAxis: 'Cumulative Profits (starting value $1)'};
+	var chart1_variables = {'Equities': {column: 'equities', visible: true},
+							'Commodities': {column: 'commodities', visible: true},
+							'Gold': {column: 'gold', visible: true},
+							'Real_Estate': {column: 'REIT', visible: true}}
+
+	// Chart 2 - Compare Bitcoin with Traditional Assets
+	var chart2_annotations = [{ x: new Date('04/01/2017'), y: 3, y0: 1, asset: 'Bitcoin', text: 'Japan legalizes Bitcoin.', orient: 'left' },
+	{ x: new Date('05/12/2017'), y: 4, y0: 1.73, asset: 'Bitcoin', text: 'WannaCry ransomware cryptoworm.', orient: 'left' },
+	{ x: new Date('06/15/2017'), y: 5, y0: 2.5,  asset: 'Bitcoin',text: 'Bitcoin crashes 19% overnight.', orient: 'left' },
+	{ x: new Date('08/24/2017'), y: 6,  y0: 4.4, asset: 'Bitcoin',text: 'Segwit activated.', orient: 'left' },
+	{ x: new Date('09/12/2017'), y: 2, y0: 4.15,  asset: 'Bitcoin',text: 'China bans ICOs.', orient: 'right' },
+	{ x: new Date('12/01/2017'), y: 12, y0: 11,  asset: 'Bitcoin',text: 'Bitcoin Bubble.', orient: 'left' },
+	{ x: new Date('12/10/2017'), y: 18, y0: 15.3, asset: 'Bitcoin', text: 'CBOE futures open', orient: 'left' }];
+	var chart2_axisLabel =  {xAxis: 'Date', yAxis: 'Cumulative Profits (starting value $1)'};
+	var chart2_variables = {'Equities': {column: 'equities', visible: true},
+							'Commodities': {column: 'commodities', visible: false},
+							'Gold': {column: 'gold', visible: false},
+							'Real Estate': {column: 'REIT', visible: false},
+							'Bitcoin': {column: 'bitcoin', visible: true}}
+
+	//Chart 3 - Compare a Range of Cryptocurrencies
+	var chart3_axisLabel =  {xAxis: 'Date', yAxis: 'Cumulative Profits (starting value $1)'};
+	var chart3_variables = {'Bitcoin': {column: 'bitcoin', visible: true}, 
+							'Litecoin': {column: 'litecoin', visible: true}, 
+							'Ethereum': {column: 'ethereum', visible: true}, 
+							'Ripple': {column: 'ripple', visible: true},
+							'Monero': {column: 'monero', visible: true},
+							'Tether': {column: 'tether', visible: true},
+							'Ardor': {column: 'ardor', visible: false},
+							'Lisk': {column: 'lisk', visible: false},
+							'Dash': {column: 'dash', visible: false},
+							'NEO': {column: 'NEO', visible: false},
+							'NEM': {column: 'NEM', visible: false},
+							'Stellar': {column: 'stellar', visible: false},
+							'Waves': {column: 'waves', visible: false}}
+
+	// Generate Chart 1, 2 and 3
+    d3.csv('rebased_prices.csv')
+    	.row(function(d){
+		 	return {
+		 		date:parseTime(d.Date), 
+		 		equities: +d.Equities,
+		 		commodities: +d.Commodities,
+		 		gold: +d.Gold,
+		 		REIT: +d.REIT,
+		 		bitcoin: +d.Bitcoin,
+		 		litecoin: +d.Litecoin,
+		 		ethereum: +d.Ethereum,
+		 		ripple: + d.Ripple,
+		 		tether: +d.Tether,
+		 		ardor: +d.Ardor,
+		 		lisk: +d.Lisk,
+		 		monero: +d.Monero,
+		 		dash: +d.Dash,
+		 		stratis: +d.Stratis,
+		 		waves: +d.Waves,
+		 		NEO: +d.NEO,
+		 		NEM: +d.NEM,
+		 		stellar: +d.Stellar
+		 	};
+		})
+		.get(function(error, data){
+
+		    var chart1 = makeLineChart(data, 'date', chart1_variables, chart1_annotations);
+		    chart1.bind({selector:"#chart-line1", axisLabels: chart1_axisLabel});
+		    chart1.render(); 
+
+		    var chart2 = makeLineChart(data, 'date', chart2_variables,  chart2_annotations);
+		    chart2.bind({selector:"#chart-line2", axisLabels: chart2_axisLabel});
+		    chart2.render();
+
+		    var chart3 = makeLineChart(data, 'date', chart3_variables);
+		    chart3.bind({selector:"#chart-line3", axisLabels: chart3_axisLabel});
+		    chart3.render();
+
+		});
+
+	// Chart 4 & 5: Scatterplots
+	var chart4_annotations = [{ x: 0.14, y: 0.025, y0: 0.016, text: 'Positive correlation between returns and risk for major coins', orient: 'left' }, 
+	{ x: 0.24, y: -0.005, y0: 0.005, text: 'Risk not rewarded for smaller coins  .', orient: 'left' }];
+	var chart5_annotations = [{ x: 0.24, y: 2, y0: 6, text: 'Negative correlation between risk and liquidity  .', orient: 'left' }];
+
+	    d3.csv('crypto_descriptive_2017.csv')
+	    	.row(function(d){
+			 	return {
+			 		ticker: d.TICKER,
+			 		name: d.NAME,
+			 		return: +d.RETURN,
+			 		risk: +d.RISK,
+			 		mktcap: +d.MKTCAP,
+			 		turnover: +d.TURNOVER_RATIO,
+			 		volume: +d.VOLUME
+			 	};
+			})
+			.get(function(error, data){
+				var chart4 = makeScatterplot(data, {xAxis: 'Daily Risk (Standard Deviation)', yAxis: 'Average Daily Return in 2017'}, chart4_annotations);
+				chart4.bind("#chart-line4");
+				chart4.render();
+
+				// log transform chart
+				var chart5 = makeScatterplot2(data, {xAxis: 'Daily Risk (Standard Deviation)', yAxis: 'Log (Average Daily Traded Value) (in USD)'}, chart5_annotations);
+				chart5.bind("#chart-line5");
+				chart5.render();
+			});
+
+
+	// Collapsible About Section
+	var coll = document.getElementsByClassName("collapsible");
+
+	for ( var i = 0; i < coll.length; i++) {
+	    coll[i].addEventListener("click", function() {
+	        this.classList.toggle("active");
+	        var content = this.nextElementSibling;
+	        if (content.style.display === "block") {
+	            content.style.display = "none";
+	        } else {
+	            content.style.display = "block";
+	        }
+	    });
+	}
+
+
+</script>
+
+
+</body>
+
+
+</html>
