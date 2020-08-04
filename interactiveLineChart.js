@@ -1,8 +1,3 @@
-/*
-    Line Chart using D3
-
-*/
-
 function makeLineChart(dataset, xName, yNames, annotations) {
 
      // Initialize Chart
@@ -263,7 +258,7 @@ function makeLineChart(dataset, xName, yNames, annotations) {
             .attr("class", "year")
             .attr("x", 9)
             .attr("y", 7);
-            // Focus line
+        // Focus line
         chart.objs.tooltip.append("line")
             .attr("class", "line")
             .attr("y1", 0)
