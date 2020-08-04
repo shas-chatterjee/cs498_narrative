@@ -1,3 +1,8 @@
+/*
+    Line Chart using D3
+
+*/
+
 function makeLineChart(dataset, xName, yNames, annotations) {
 
      // Initialize Chart
