@@ -146,7 +146,7 @@ function makeScatterplot(data, axisLabel, annotationLabel) {
    return chartObj;
 }
 
-
+<!--
 function makeScatterplot2(data, axisLabel, annotationLabel) {
     var chartObj = {};
 
@@ -292,3 +292,4 @@ function makeScatterplot2(data, axisLabel, annotationLabel) {
 
    return chartObj;
 }
+-->
