@@ -263,6 +263,12 @@ function makeLineChart(dataset, xName, yNames, annotations) {
             .attr("class", "year")
             .attr("x", 9)
             .attr("y", 7);
+            // Focus line
+        chart.objs.tooltip.append("line")
+            .attr("class", "line")
+            .attr("y1", 0)
+            .attr("y2", chart.height)
+            .style("stroke-dasharray", "3,3");
 
         for (yName in chart.groupObjs) {
             chartY = chart.groupObjs[yName];
