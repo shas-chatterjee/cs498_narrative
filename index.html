@@ -135,20 +135,7 @@
 							'Gold': {column: 'gold', visible: true},
 							'Real_Estate': {column: 'REIT', visible: true}}
 
-	// Chart 2 - Compare Bitcoin with Traditional Assets
-	var chart2_annotations = [{ x: new Date('04/01/2017'), y: 3, y0: 1, asset: 'Bitcoin', text: 'Japan legalizes Bitcoin.', orient: 'left' },
-	{ x: new Date('05/12/2017'), y: 4, y0: 1.73, asset: 'Bitcoin', text: 'WannaCry ransomware cryptoworm.', orient: 'left' },
-	{ x: new Date('06/15/2017'), y: 5, y0: 2.5,  asset: 'Bitcoin',text: 'Bitcoin crashes 19% overnight.', orient: 'left' },
-	{ x: new Date('08/24/2017'), y: 6,  y0: 4.4, asset: 'Bitcoin',text: 'Segwit activated.', orient: 'left' },
-	{ x: new Date('09/12/2017'), y: 2, y0: 4.15,  asset: 'Bitcoin',text: 'China bans ICOs.', orient: 'right' },
-	{ x: new Date('12/01/2017'), y: 12, y0: 11,  asset: 'Bitcoin',text: 'Bitcoin Bubble.', orient: 'left' },
-	{ x: new Date('12/10/2017'), y: 18, y0: 15.3, asset: 'Bitcoin', text: 'CBOE futures open', orient: 'left' }];
-	var chart2_axisLabel =  {xAxis: 'Date', yAxis: 'Cumulative Profits (starting value $1)'};
-	var chart2_variables = {'Equities': {column: 'equities', visible: true},
-							'Commodities': {column: 'commodities', visible: false},
-							'Gold': {column: 'gold', visible: false},
-							'Real Estate': {column: 'REIT', visible: false},
-							'Bitcoin': {column: 'bitcoin', visible: true}}
+
 
 	//Chart 3 - Compare a Range of Cryptocurrencies
 	var chart3_axisLabel =  {xAxis: 'Date', yAxis: 'Cumulative Profits (starting value $1)'};
@@ -197,9 +184,6 @@
 		    chart1.bind({selector:"#chart-line1", axisLabels: chart1_axisLabel});
 		    chart1.render(); 
 
-		    var chart2 = makeLineChart(data, 'date', chart2_variables,  chart2_annotations);
-		    chart2.bind({selector:"#chart-line2", axisLabels: chart2_axisLabel});
-		    chart2.render();
 
 		    var chart3 = makeLineChart(data, 'date', chart3_variables);
 		    chart3.bind({selector:"#chart-line3", axisLabels: chart3_axisLabel});
@@ -210,7 +194,7 @@
 	// Chart 4 & 5: Scatterplots
 	var chart4_annotations = [{ x: 0.14, y: 0.025, y0: 0.016, text: 'Positive correlation between returns and risk for major coins', orient: 'left' }, 
 	{ x: 0.24, y: -0.005, y0: 0.005, text: 'Risk not rewarded for smaller coins  .', orient: 'left' }];
-	var chart5_annotations = [{ x: 0.24, y: 2, y0: 6, text: 'Negative correlation between risk and liquidity  .', orient: 'left' }];
+	
 
 	    d3.csv('crypto_descriptive_2017.csv')
 	    	.row(function(d){
@@ -228,11 +212,6 @@
 				var chart4 = makeScatterplot(data, {xAxis: 'Daily Risk (Standard Deviation)', yAxis: 'Average Daily Return in 2017'}, chart4_annotations);
 				chart4.bind("#chart-line4");
 				chart4.render();
-
-				// log transform chart
-				var chart5 = makeScatterplot2(data, {xAxis: 'Daily Risk (Standard Deviation)', yAxis: 'Log (Average Daily Traded Value) (in USD)'}, chart5_annotations);
-				chart5.bind("#chart-line5");
-				chart5.render();
 			});
 
 
