@@ -62,17 +62,6 @@
 	</div>
 
 
-	<!-- CHART 5 - Risk Liquidity -->
-	<div class="slides fade">
-		 <h1> Which Coins? The Risk - Liquidity Relationship </h1>
-		We see a negative trend between risk and liquidity (traded volume) in the cryptocurrency universe throughout 2017. We find larger capitalization coins are traded more frequently and have lower risk.
-		Higher risk cryptocurrencies are generally less liquid. <br>
-		<font size="2" color="dodgerblue">[hover above dots to see details  /  radius of dots is scaled to log market-cap]</font>
-		<div class="page_number">5 / 5</div>
-		<div class="chart-wrapper" id="chart-line5"> </div>
-		<div class="footnote"> source: www.coinmarketcap.com </div>  
-	</div>
-
 	<!-- NEXT AND PREVIOUS ARROWS -->
 	<a class="prev" onclick="plusSlides(-1)">&#10094;</a>
 	<a class="next" onclick="plusSlides(1)">&#10095;</a>
@@ -210,7 +199,7 @@
 	// Chart 4 & 5: Scatterplots
 	var chart4_annotations = [{ x: 0.14, y: 0.025, y0: 0.016, text: 'Positive correlation between returns and risk for major coins', orient: 'left' }, 
 	{ x: 0.24, y: -0.005, y0: 0.005, text: 'Risk not rewarded for smaller coins  .', orient: 'left' }];
-	var chart5_annotations = [{ x: 0.24, y: 2, y0: 6, text: 'Negative correlation between risk and liquidity  .', orient: 'left' }];
+
 
 	    d3.csv('crypto_descriptive_2017.csv')
 	    	.row(function(d){
